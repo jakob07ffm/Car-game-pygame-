@@ -23,6 +23,9 @@ car_angle = 0
 car_acceleration = 0.1
 car_turn_speed = 5
 
+x = 0
+y = 0
+
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -42,6 +45,7 @@ while running:
 
     if keys[pygame.K_w]:
         car_speed += car_acceleration
+        
     if keys[pygame.K_s]:
         car_speed -= car_acceleration     
     
@@ -51,10 +55,14 @@ while running:
     if keys[pygame.K_a]:
         car_angle += car_turn_speed
 
+    radians = math.radians(car_angle)
+    car_x += car_speed * math.cos(radians)
+    car_y += car_speed * math.sin(radians)
+
     rotated_car_img = pygame.transform.rotate(car_img, car_angle)
     new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
 
-    win.blit(rotated_car_img, new_rect.topleft)    
+    win.blit(rotated_car_img, new_rect.topleft)
     
     pygame.display.flip()
     
