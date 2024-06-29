@@ -13,18 +13,16 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-
-car_x = 400 
-car_y = 400
+car_x = 500
+car_y = 500
 car_speed = 0
 car_img_bad = pygame.image.load("car_pixel.png")
 car_img = pygame.transform.scale(car_img_bad, (32, 52))
 car_angle = 0
 car_acceleration = 0.1
 car_turn_speed = 5
-
-x = 0
-y = 0
+car_max_speed = 7
+car_friction = 0.05
 
 clock = pygame.time.Clock()
 FPS = 60
@@ -45,26 +43,34 @@ while running:
 
     if keys[pygame.K_w]:
         car_speed += car_acceleration
-        
     if keys[pygame.K_s]:
-        car_speed -= car_acceleration     
-    
-    if keys[pygame.K_d]:
+        car_speed -= car_acceleration
+
+    if keys[pygame.K_a] and not car_speed == 0:
         car_angle -= car_turn_speed
-       
-    if keys[pygame.K_a]:
+    if keys[pygame.K_d] and not car_speed == 0:
         car_angle += car_turn_speed
 
-    radians = math.radians(car_angle)
-    car_x += car_speed * math.cos(radians)
-    car_y += car_speed * math.sin(radians)
+    if car_speed > car_max_speed:
+        car_speed = car_max_speed
+    if car_speed < -car_max_speed:
+        car_speed = -car_max_speed
 
-    rotated_car_img = pygame.transform.rotate(car_img, car_angle)
+    if not keys[pygame.K_w] and not keys[pygame.K_s] and not car_speed <= 0:
+        car_speed = max(0, car_speed - car_friction)
+    if not keys[pygame.K_w] and not keys[pygame.K_s] and car_speed < 0:
+        car_speed = min(0, car_speed + car_friction)
+
+    radians = math.radians(car_angle)
+    car_x += car_speed * math.sin(radians)
+    car_y -= car_speed * math.cos(radians)
+
+    rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
     new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
 
     win.blit(rotated_car_img, new_rect.topleft)
-    
+
     pygame.display.flip()
-    
+
 pygame.quit()
 sys.exit()
