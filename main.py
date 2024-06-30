@@ -29,9 +29,6 @@ car_friction = 0.05
 
 track1_img = pygame.image.load("track.png")
 
-#crate_img_big = pygame.image.load("crate.png")
-# = pygame.transform.scale(crate_img_big, (16, 16))
-
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -40,23 +37,41 @@ nitro_img = pygame.transform.scale(nitro_img_small, (21, 33))
 nitro_time = 5000
 nitro_active = False
 
+menu_img_small = pygame.image.load("menu.jpg")
+menu_img = pygame.transform.scale(menu_img_small, (1000, 1000))
+
 last_time = pygame.time.get_ticks()
 
+pygame.font.init()
+font = pygame.font.Font(None, 36)  
+
 def nitro():
-    global keys, nitro, nitro_last, car_max_speed
-    
+    global keys, nitro, nitro_last, car_max_speed, nitro_active, last_time
     
     current_time = pygame.time.get_ticks()
     if current_time - last_time >= nitro_time:
         nitro_active = True
 
-    if nitro:
-        win.blit(nitro_img, (0, 0))
-
-    if keys[pygame.K_SPACE] and nitro:
+    if keys[pygame.K_SPACE] and nitro_active:
         car_max_speed = 12
+        win.blit(nitro_img, (0, 0))
+    else:
+        car_max_speed = 7
     
-running = True
+running = False
+while not running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                running = True
+                
+    win.blit(menu_img, (0, 0))
+    
+    pygame.display.flip()    
+
 while running:
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -109,6 +124,9 @@ while running:
     nitro()
 
     win.blit(rotated_car_img, new_rect.topleft)
+
+    speed_text = font.render(f'Speed: {car_speed:.2f}', True, WHITE)
+    win.blit(speed_text, (100, 10))
 
     pygame.display.flip()
 
