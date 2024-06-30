@@ -4,7 +4,9 @@ import math
 
 pygame.init()
 
-win = pygame.display.set_mode((1000, 1000))
+win_width = 1000
+win_height = 1000
+win = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption("Car_game")
 
 BLACK = (0, 0, 0)
@@ -24,6 +26,8 @@ car_turn_speed = 5
 car_max_speed = 7
 car_friction = 0.05
 
+track1_img = pygame.image.load("track.png")
+
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -39,7 +43,7 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    win.fill(GREEN)
+    win.blit(track1_img, (0, 0))
 
     if keys[pygame.K_w]:
         car_speed += car_acceleration
@@ -65,6 +69,15 @@ while running:
     car_x += car_speed * math.sin(radians)
     car_y -= car_speed * math.cos(radians)
 
+    if car_x <= 20:
+        car_x = 20
+    if car_x >= 980:
+        car_x = 980
+    if car_y <= 20:
+        car_y = 20
+    if car_y >= 980:
+        car_y = 980
+    
     rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
     new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
 
