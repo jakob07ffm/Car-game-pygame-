@@ -13,11 +13,11 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-TRACK_GREEN = (10, 169, 19)
+TRACK_GREEN = (10, 168, 18)
 BLUE = (0, 0, 255)
 
 car_x = 500
-car_y = 500
+car_y = 200
 car_speed = 0
 car_img_bad = pygame.image.load("car_pixel.png")
 car_img = pygame.transform.scale(car_img_bad, (32, 52))
@@ -57,7 +57,10 @@ def nitro():
         win.blit(nitro_img, (0, 0))
     else:
         car_max_speed = 7
-    
+
+def get_color_at_position(x, y):
+    return track1_img.get_at((int(x), int(y)))[:3]
+
 running = False
 while not running:
     for event in pygame.event.get():
@@ -117,7 +120,11 @@ while running:
         car_y = 20
     if car_y >= 980:
         car_y = 980
-    
+
+    car_center_color = get_color_at_position(car_x, car_y)
+    if car_center_color == TRACK_GREEN:
+        car_speed = 0
+
     rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
     new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
 
