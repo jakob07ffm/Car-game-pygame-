@@ -143,67 +143,64 @@ while running:
 
     pygame.display.flip()
 
-while running_mouse:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running_mouse = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running_mouse = False
+#while running_mouse:
+#    clock.tick(FPS)
+#    for event in pygame.event.get():
+#        if event.type == pygame.QUIT:
+#            running_mouse = False
+#        elif event.type == pygame.KEYDOWN:
+#            if event.key == pygame.K_ESCAPE:
+#                running_mouse = False
+#
+#    keys = pygame.key.get_pressed()
+#
+#    win.blit(track1_img, (0, 0))
+#
+#    mouse_pos = pygame.mouse.get_pos()
+#
+#    dx = mouse_pos[0] - car_x
+#    dy = mouse_pos[1] - car_y
+#    target_angle = math.degrees(math.atan2(-dy, dx))
+#
+#    angle_diff = (target_angle - car_angle + 180) % 360 - 180
+#    if angle_diff > 0:
+#        car_angle += car_turn_speed
+#    elif angle_diff < 0:
+#        car_angle -= car_turn_speed
+#    
+#    car_angle %= 360
 
-    keys = pygame.key.get_pressed()
+#    radians = math.radians(car_angle)
+#    car_x += car_speed * math.cos(radians)
+#    car_y -= car_speed * math.sin(radians)
+#
+#    if car_speed < car_max_speed:
+#        car_speed += car_acceleration
+#    
+#    if car_x <= 20:
+#        car_x = 20
+#    if car_x >= 980:
+#        car_x = 980
+#    if car_y <= 20:
+#        car_y = 20
+ #   if car_y >= 980:
+#        car_y = 980
+#
+#    car_center_color = get_color_at_position(car_x, car_y)
+#    if car_center_color == TRACK_GREEN:
+#        car_speed = 0
 
-    win.blit(track1_img, (0, 0))
+#    rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
+#    new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
 
-    mouse_pos = pygame.mouse.get_pos()
+#    nitro()
 
-    # Berechne den Winkel zum Mauszeiger
-    dx = mouse_pos[0] - car_x
-    dy = mouse_pos[1] - car_y
-    target_angle = math.degrees(math.atan2(-dy, dx))
-    
-    # Winkel des Autos anpassen
-    angle_diff = (target_angle - car_angle + 180) % 360 - 180
-    if angle_diff > 0:
-        car_angle += car_turn_speed
-    elif angle_diff < 0:
-        car_angle -= car_turn_speed
-    
-    car_angle %= 360
+#    win.blit(rotated_car_img, new_rect.topleft)
 
-    # Bewegung des Autos
-    radians = math.radians(car_angle)
-    car_x += car_speed * math.cos(radians)
-    car_y -= car_speed * math.sin(radians)
+#    speed_text = font.render(f'Speed: {car_speed:.2f}', True, WHITE)
+#    win.blit(speed_text, (100, 10))
 
-    if car_speed < car_max_speed:
-        car_speed += car_acceleration
-    
-    if car_x <= 20:
-        car_x = 20
-    if car_x >= 980:
-        car_x = 980
-    if car_y <= 20:
-        car_y = 20
-    if car_y >= 980:
-        car_y = 980
-
-    car_center_color = get_color_at_position(car_x, car_y)
-    if car_center_color == TRACK_GREEN:
-        car_speed = 0
-
-    rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
-    new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
-
-    nitro()
-
-    win.blit(rotated_car_img, new_rect.topleft)
-
-    speed_text = font.render(f'Speed: {car_speed:.2f}', True, WHITE)
-    win.blit(speed_text, (100, 10))
-
-    pygame.display.flip()
+#    pygame.display.flip()
 
 pygame.quit()
 sys.exit()
