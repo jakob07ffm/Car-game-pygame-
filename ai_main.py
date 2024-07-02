@@ -1,6 +1,8 @@
 import pygame
 import sys
 import math
+import random
+import os
 
 pygame.init()
 
@@ -41,12 +43,17 @@ font = pygame.font.Font(None, 36)
 start_time = pygame.time.get_ticks()
 
 checkpoints = [
+    pygame.Rect(390, 90, 10, 150),
     pygame.Rect(25, 359, 150, 10),
     pygame.Rect(790, 790, 155, 10),
     pygame.Rect(410, 230, 180, 10)
 ]
 
 current_checkpoint = 0
+
+directions = [
+    "a", "d"
+    ]
 
 def get_color_at_position(x, y):
     return track1_img.get_at((int(x), int(y)))[:3]
@@ -60,6 +67,16 @@ def game_over():
     start_time = pygame.time.get_ticks()
     current_checkpoint = 0
     pygame.display.flip()
+
+    if current_checkpoint <= 1:
+        with open("x.txt", "w") as file:
+            pass 
+        with open("y.txt", "w") as file:
+            pass
+        with open("angle.txt", "w") as file:
+            pass
+
+
 
 running = True
 
@@ -76,38 +93,22 @@ while running:
 
     win.blit(track1_img, (0, 0))
 
-    if keys[pygame.K_w]:
+    if car_speed < car_max_speed:
         car_speed += car_acceleration
-    if keys[pygame.K_s]:
-        car_speed -= car_acceleration
 
-    if keys[pygame.K_a] and not car_speed == 0:
+    rand_dir = random.choice(directions)
+    
+    if rand_dir == "a":
         car_angle -= car_turn_speed
-    if keys[pygame.K_d] and not car_speed == 0:
+    if rand_dir == "d":
         car_angle += car_turn_speed
 
     if car_speed > car_max_speed:
         car_speed = car_max_speed
-    if car_speed < -car_max_speed:
-        car_speed = -car_max_speed
-
-    if not keys[pygame.K_w] and not keys[pygame.K_s] and not car_speed <= 0:
-        car_speed = max(0, car_speed - car_friction)
-    if not keys[pygame.K_w] and not keys[pygame.K_s] and car_speed < 0:
-        car_speed = min(0, car_speed + car_friction)
 
     radians = math.radians(car_angle)
     car_x += car_speed * math.sin(radians)
     car_y -= car_speed * math.cos(radians)
-
-    if car_x <= 20:
-        car_x = 20
-    if car_x >= 980:
-        car_x = 980
-    if car_y <= 20:
-        car_y = 20
-    if car_y >= 980:
-        car_y = 980
 
     rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
     new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
