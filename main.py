@@ -1,206 +1,96 @@
 import pygame
 import sys
-import math
+import random
 
 pygame.init()
 
-win_width = 1000
-win_height = 1000
-win = pygame.display.set_mode((win_width, win_height))
-pygame.display.set_caption("Car_game")
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Advanced Car Game')
 
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-TRACK_GREEN = (10, 168, 18)
 BLUE = (0, 0, 255)
-
-car_x = 500
-car_y = 200
-car_speed = 0
-car_img_bad = pygame.image.load("car_pixel.png")
-car_img = pygame.transform.scale(car_img_bad, (32, 52))
-car_angle = 0
-car_acceleration = 0.05
-car_turn_speed = 5
-car_max_speed = 7
-car_friction = 0.05
-
-track1_img = pygame.image.load("track.png")
 
 clock = pygame.time.Clock()
 FPS = 60
 
-nitro_img_small = pygame.image.load("nitro.png")
-nitro_img = pygame.transform.scale(nitro_img_small, (21, 33))
-nitro_time = 5000
-nitro_active = False
+CAR_WIDTH, CAR_HEIGHT = 50, 80
+car_x = WIDTH // 2
+car_y = HEIGHT - CAR_HEIGHT - 10
+car_speed = 5
 
-menu_img_small = pygame.image.load("menu.jpg")
-menu_img = pygame.transform.scale(menu_img_small, (1000, 1000))
+ROAD_WIDTH = WIDTH // 2
+ROAD_COLOR = (50, 50, 50)
 
-last_time = pygame.time.get_ticks()
+OBSTACLE_WIDTH = 50
+OBSTACLE_HEIGHT = 50
+obstacle_speed = 5
+obstacles = []
 
-pygame.font.init()
-font = pygame.font.Font(None, 36)
+def create_obstacle():
+    x = random.randint(WIDTH // 4, WIDTH - OBSTACLE_WIDTH - WIDTH // 4)
+    y = -OBSTACLE_HEIGHT
+    return [x, y]
 
-def nitro():
-    global keys, nitro, nitro_last, car_max_speed, nitro_active, last_time
-    
-    current_time = pygame.time.get_ticks()
-    if current_time - last_time >= nitro_time:
-        nitro_active = True
+def draw_car(x, y):
+    pygame.draw.rect(screen, BLUE, [x, y, CAR_WIDTH, CAR_HEIGHT])
+    pygame.draw.polygon(screen, BLACK, [(x, y + CAR_HEIGHT), (x + CAR_WIDTH // 2, y + CAR_HEIGHT + 20), (x + CAR_WIDTH, y + CAR_HEIGHT)])
 
-    if keys[pygame.K_SPACE] and nitro_active:
-        car_max_speed = 12
-        win.blit(nitro_img, (0, 0))
-    else:
-        car_max_speed = 7
+def draw_road():
+    pygame.draw.rect(screen, ROAD_COLOR, [WIDTH // 4, 0, ROAD_WIDTH, HEIGHT])
 
-def get_color_at_position(x, y):
-    return track1_img.get_at((int(x), int(y)))[:3]
+def draw_obstacles(obstacles):
+    for obs in obstacles:
+        pygame.draw.rect(screen, RED, [obs[0], obs[1], OBSTACLE_WIDTH, OBSTACLE_HEIGHT])
 
-menu_running = True
-running = False
-running_mouse = False
-while menu_running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+def move_obstacles(obstacles):
+    for obs in obstacles:
+        obs[1] += obstacle_speed
+
+def check_collision(car_x, car_y, obstacles):
+    for obs in obstacles:
+        if (car_x < obs[0] + OBSTACLE_WIDTH and car_x + CAR_WIDTH > obs[0] and
+            car_y < obs[1] + OBSTACLE_HEIGHT and car_y + CAR_HEIGHT > obs[1]):
+            return True
+    return False
+
+def game_loop():
+    global car_x, car_y, obstacles
+    obstacles = []
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and car_x > WIDTH // 4:
+            car_x -= car_speed
+        if keys[pygame.K_RIGHT] and car_x < WIDTH - CAR_WIDTH - WIDTH // 4:
+            car_x += car_speed
+
+        if random.randint(1, 20) == 1:
+            obstacles.append(create_obstacle())
+        
+        move_obstacles(obstacles)
+        
+        if check_collision(car_x, car_y, obstacles):
+            print("Game Over")
             pygame.quit()
             sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                running = True
-                menu_running = False
-            if event.key == pygame.K_m:
-                running_mouse = True
-                menu_running = False
-                
-    win.blit(menu_img, (0, 0))
-    
-    pygame.display.flip()
+        
+        obstacles = [obs for obs in obstacles if obs[1] < HEIGHT]
 
-while running:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
+        screen.fill(WHITE)
+        draw_road()
+        draw_car(car_x, car_y)
+        draw_obstacles(obstacles)
+        
+        pygame.display.flip()
+        clock.tick(FPS)
 
-    keys = pygame.key.get_pressed()
-
-    win.blit(track1_img, (0, 0))
-
-    if keys[pygame.K_w]:
-        car_speed += car_acceleration
-    if keys[pygame.K_s]:
-        car_speed -= car_acceleration
-
-    if keys[pygame.K_a] and not car_speed == 0:
-        car_angle -= car_turn_speed
-    if keys[pygame.K_d] and not car_speed == 0:
-        car_angle += car_turn_speed
-
-    if car_speed > car_max_speed:
-        car_speed = car_max_speed
-    if car_speed < -car_max_speed:
-        car_speed = -car_max_speed
-
-    if not keys[pygame.K_w] and not keys[pygame.K_s] and not car_speed <= 0:
-        car_speed = max(0, car_speed - car_friction)
-    if not keys[pygame.K_w] and not keys[pygame.K_s] and car_speed < 0:
-        car_speed = min(0, car_speed + car_friction)
-
-    radians = math.radians(car_angle)
-    car_x += car_speed * math.sin(radians)
-    car_y -= car_speed * math.cos(radians)
-
-    if car_x <= 20:
-        car_x = 20
-    if car_x >= 980:
-        car_x = 980
-    if car_y <= 20:
-        car_y = 20
-    if car_y >= 980:
-        car_y = 980
-
-    car_center_color = get_color_at_position(car_x, car_y)
-    if car_center_color == TRACK_GREEN:
-        car_speed = 0
-
-    rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
-    new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
-
-    nitro()
-
-    win.blit(rotated_car_img, new_rect.topleft)
-
-    speed_text = font.render(f'Speed: {car_speed:.2f}', True, WHITE)
-    win.blit(speed_text, (100, 10))
-
-    pygame.display.flip()
-
-#while running_mouse:
-#    clock.tick(FPS)
-#    for event in pygame.event.get():
-#        if event.type == pygame.QUIT:
-#            running_mouse = False
-#        elif event.type == pygame.KEYDOWN:
-#            if event.key == pygame.K_ESCAPE:
-#                running_mouse = False
-#
-#    keys = pygame.key.get_pressed()
-#
-#    win.blit(track1_img, (0, 0))
-#
-#    mouse_pos = pygame.mouse.get_pos()
-#
-#    dx = mouse_pos[0] - car_x
-#    dy = mouse_pos[1] - car_y
-#    target_angle = math.degrees(math.atan2(-dy, dx))
-#
-#    angle_diff = (target_angle - car_angle + 180) % 360 - 180
-#    if angle_diff > 0:
-#        car_angle += car_turn_speed
-#    elif angle_diff < 0:
-#        car_angle -= car_turn_speed
-#    
-#    car_angle %= 360
-
-#    radians = math.radians(car_angle)
-#    car_x += car_speed * math.cos(radians)
-#    car_y -= car_speed * math.sin(radians)
-#
-#    if car_speed < car_max_speed:
-#        car_speed += car_acceleration
-#    
-#    if car_x <= 20:
-#        car_x = 20
-#    if car_x >= 980:
-#        car_x = 980
-#    if car_y <= 20:
-#        car_y = 20
- #   if car_y >= 980:
-#        car_y = 980
-#
-#    car_center_color = get_color_at_position(car_x, car_y)
-#    if car_center_color == TRACK_GREEN:
-#        car_speed = 0
-
-#    rotated_car_img = pygame.transform.rotate(car_img, -car_angle)
-#    new_rect = rotated_car_img.get_rect(center=(car_x, car_y))
-
-#    nitro()
-
-#    win.blit(rotated_car_img, new_rect.topleft)
-
-#    speed_text = font.render(f'Speed: {car_speed:.2f}', True, WHITE)
-#    win.blit(speed_text, (100, 10))
-
-#    pygame.display.flip()
-
-pygame.quit()
-sys.exit()
+if __name__ == "__main__":
+    game_loop()
